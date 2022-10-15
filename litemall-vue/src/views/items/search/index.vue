@@ -119,6 +119,9 @@ export default {
         this.page = data.page;
         this.limit = data.limit;
         this.pages = data.pages;
+        if (this.pages <= 0) {
+          this.isEmpty = true
+        }
       });
     },
     async loadMore() {
