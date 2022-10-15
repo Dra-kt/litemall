@@ -7,7 +7,8 @@
                 desc="暂无描述"
                 :num="item.number"
                 :price="item.price +'.00'"
-                :thumb="item.picUrl"></van-card>
+                :thumb="item.picUrl"
+                @click="clickGoods(item.goodsSn)"></van-card>
 
       <van-cell-group>
         <van-cell title="商品金额">
@@ -110,6 +111,9 @@ export default {
   },
 
   methods: {
+    clickGoods (id) {
+      this.$router.push(`/items/detail/${id}`);
+    },
     showExp() {
       return _.has(this.orderInfo, 'expNo');
     },
