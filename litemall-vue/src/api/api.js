@@ -450,4 +450,15 @@ export function getList(api, query) {
   })
 }
 
+const skipPayURL = 'wx/order/skip-pay'
+export function skipPay (orderid) {
+  return request({
+    url: skipPayURL,
+    method: 'get',
+    params: {
+      orderid
+    }
+  })
+}
+
 export const REFUND_LIST = '';

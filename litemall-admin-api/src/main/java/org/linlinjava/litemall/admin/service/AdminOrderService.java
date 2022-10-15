@@ -123,7 +123,7 @@ public class AdminOrderService {
         wxPayRefundRequest.setTotalFee(totalFee);
         wxPayRefundRequest.setRefundFee(totalFee);
 
-        WxPayRefundResult wxPayRefundResult;
+        /*WxPayRefundResult wxPayRefundResult;
         try {
             wxPayRefundResult = wxPayService.refund(wxPayRefundRequest);
         } catch (WxPayException e) {
@@ -137,7 +137,7 @@ public class AdminOrderService {
         if (!wxPayRefundResult.getResultCode().equals("SUCCESS")) {
             logger.warn("refund fail: " + wxPayRefundResult.getReturnMsg());
             return ResponseUtil.fail(ORDER_REFUND_FAILED, "订单退款失败");
-        }
+        }*/
 
         LocalDateTime now = LocalDateTime.now();
         // 设置订单取消状态
@@ -145,8 +145,9 @@ public class AdminOrderService {
         order.setEndTime(now);
         // 记录订单退款相关信息
         order.setRefundAmount(order.getActualPrice());
-        order.setRefundType("微信退款接口");
-        order.setRefundContent(wxPayRefundResult.getRefundId());
+        order.setRefundType("退款接口");
+//        order.setRefundContent(wxPayRefundResult.getRefundId());
+        order.setRefundContent("f" + wxPayRefundRequest.getRefundFee()+orderId+System.currentTimeMillis());
         order.setRefundTime(now);
         if (orderService.updateWithOptimisticLocker(order) == 0) {
             throw new RuntimeException("更新数据已失效");

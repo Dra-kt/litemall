@@ -29,6 +29,12 @@
             </template>            
             <van-radio name="wx"/>
           </van-cell>
+          <van-cell>
+            <template slot="title">
+              <div>完成支付</div>
+            </template>
+            <van-radio name="dxdone"/>
+          </van-cell>
         </van-cell-group>
       </van-radio-group>
     </div>
@@ -39,7 +45,7 @@
 
 <script>
 import { Radio, RadioGroup, Dialog } from 'vant';
-import { orderDetail, orderPrepay, orderH5pay } from '@/api/api';
+import { orderDetail, orderPrepay, orderH5pay, skipPay } from '@/api/api';
 import _ from 'lodash';
 import { getLocalStorage, setLocalStorage } from '@/utils/local-storage';
 
@@ -48,7 +54,7 @@ export default {
 
   data() {
     return {
-      payWay: 'wx',
+      payWay: 'dxdone',
       order: {
         orderInfo: {},
         orderGoods: []
@@ -63,13 +69,49 @@ export default {
     }
   },
   methods: {
+    doneThePay () {
+      let that = this
+      skipPay(this.orderId)
+        .then(res => {
+          let data = res.data
+          console.log(data.errno)
+          if (data.errno == 0) {
+            that.$router.replace({
+              name: 'paymentStatus',
+              params: {
+                status: 'success'
+              }
+            })
+          }
+          else {
+            that.$router.replace({
+              name: 'paymentStatus',
+              params: {
+                status: 'failed'
+              }
+            })
+          }
+        })
+        .catch(err => {
+          Dialog.alert({ message: err.data.errmsg });
+            that.$router.replace({
+              name: 'paymentStatus',
+              params: {
+                status: 'failed'
+              }
+          })
+        })
+    },
     getOrder(orderId) {
       orderDetail({orderId: orderId}).then(res => {
         this.order = res.data.data;
       });
     },
     pay() {
-      
+      if (this.payWay === 'dxdone') {
+        return this.doneThePay()
+      }
+
       Dialog.alert({
         message: '你选择了' + (this.payWay === 'wx' ? '微信支付' : '支付宝支付')
       }).then(() => {
@@ -139,7 +181,10 @@ export default {
                 Dialog.alert({ message: err.data.errmsg });
               });
           }
-        } else {
+        } else if (this.payWay === 'dxdone') {
+          this.doneThePay()
+        }
+        else {
           //todo : alipay
         }
       });

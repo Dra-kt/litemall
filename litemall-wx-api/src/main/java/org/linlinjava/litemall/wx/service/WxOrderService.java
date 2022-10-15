@@ -656,7 +656,6 @@ public class WxOrderService {
             orderRequest.setSpbillCreateIp(IpUtil.getIpAddr(request));
 
             result = wxPayService.createOrder(orderRequest);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1037,5 +1036,76 @@ public class WxOrderService {
             couponUser.setUpdateTime(LocalDateTime.now());
             couponUserService.update(couponUser);
         }
+    }
+
+    @Transactional
+    public Object skipPay(Integer userId, String orderIdStr, HttpServletRequest request) {
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        if (orderIdStr == null) {
+            return ResponseUtil.badArgument();
+        }
+        Integer orderId = Integer.parseInt(orderIdStr);
+
+        LitemallOrder order = orderService.findById(userId, orderId);
+        if (order == null) {
+            return ResponseUtil.badArgumentValue();
+        }
+        if (!order.getUserId().equals(userId)) {
+            return ResponseUtil.badArgumentValue();
+        }
+
+        // 检测是否能够取消
+        OrderHandleOption handleOption = OrderUtil.build(order);
+        if (!handleOption.isPay()) {
+            return ResponseUtil.fail(ORDER_INVALID_OPERATION, "订单不能支付");
+        }
+        // 检查这个订单是否已经处理过
+        if (OrderUtil.hasPayed(order)) {
+            return WxPayNotifyResponse.success("订单已经处理成功!");
+        }
+
+        // 设置支付订单金额
+        order.setActualPrice(order.getGoodsPrice());
+        order.setPayId("d"+ order.getGoodsPrice().intValue()+userId+System.currentTimeMillis());
+        order.setPayTime(LocalDateTime.now());
+        order.setOrderStatus(OrderUtil.STATUS_PAY);
+        if(orderService.updateWithOptimisticLocker(order) == 0) {
+            return WxPayNotifyResponse.fail("更新数据已失效");
+        }
+
+        //  支付成功，有团购信息，更新团购信息
+        LitemallGroupon groupon = grouponService.queryByOrderId(order.getId());
+        if (groupon != null) {
+            LitemallGrouponRules grouponRules = grouponRulesService.findById(groupon.getRulesId());
+
+            //仅当发起者才创建分享图片
+            if (groupon.getGrouponId() == 0) {
+                String url = qCodeService.createGrouponShareImage(grouponRules.getGoodsName(), grouponRules.getPicUrl(), groupon);
+                groupon.setShareUrl(url);
+            }
+            groupon.setStatus(GrouponConstant.STATUS_ON);
+            if (grouponService.updateById(groupon) == 0) {
+                return WxPayNotifyResponse.fail("更新数据已失效");
+            }
+
+
+            List<LitemallGroupon> grouponList = grouponService.queryJoinRecord(groupon.getGrouponId());
+            if (groupon.getGrouponId() != 0 && (grouponList.size() >= grouponRules.getDiscountMember() - 1)) {
+                for (LitemallGroupon grouponActivity : grouponList) {
+                    grouponActivity.setStatus(GrouponConstant.STATUS_SUCCEED);
+                    grouponService.updateById(grouponActivity);
+                }
+
+                LitemallGroupon grouponSource = grouponService.queryById(groupon.getGrouponId());
+                grouponSource.setStatus(GrouponConstant.STATUS_SUCCEED);
+                grouponService.updateById(grouponSource);
+            }
+        }
+        // 取消订单超时未支付任务
+        taskService.removeTask(new OrderUnpaidTask(order.getId()));
+
+        return ResponseUtil.ok();
     }
 }

@@ -182,4 +182,8 @@ public class WxOrderController {
         return wxOrderService.comment(userId, body);
     }
 
+    @GetMapping("skip-pay")
+    public Object skipPay(@LoginUser Integer userId, @RequestParam String orderid, HttpServletRequest request) {
+        return wxOrderService.skipPay(userId, orderid, request);
+    }
 }

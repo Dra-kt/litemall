@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class Application {
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("druid.mysql.usePingMethod", "false");
         SpringApplication.run(Application.class, args);
     }
 
