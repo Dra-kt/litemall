@@ -450,7 +450,7 @@ export function getList(api, query) {
   })
 }
 
-const skipPayURL = 'wx/order/skip-pay'
+const skipPayURL = '/order/skip-pay'
 export function skipPay (orderid) {
   return request({
     url: skipPayURL,
