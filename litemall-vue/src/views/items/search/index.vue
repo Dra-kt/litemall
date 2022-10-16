@@ -5,6 +5,7 @@
       <van-search placeholder="请输入商品名称"
                   v-model="keyword"
                   @search="enterSearch"
+                  @cancel="clearSearch"
                   autofocus />
     </form>
     <div class="item_search_content">
@@ -142,6 +143,10 @@ export default {
     },
     itemClick(id) {
       this.$router.push(`/items/detail/${id}`);
+    },
+    clearSearch () {
+      debugger
+      this.keyword = ''
     }
   },
   activated() {
@@ -174,5 +179,6 @@ export default {
 .item_search_history > span {
   margin-right: 10px;
   margin-bottom: 10px;
+  border-radius: 3px;
 }
 </style>
