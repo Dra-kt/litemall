@@ -67,6 +67,7 @@ export default {
     enterSearch() {
       this.reset();
       this.searchGoods();
+      this.pushHistoryTolocal(this.keyword)
     },
     clickSearch(word) {
       this.keyword = word.trim();
@@ -86,7 +87,7 @@ export default {
       const wordHistory = this.wordHistory;
       const historyKeyWord = this.getKeyWordHistory();
       if (!!keyword.trim() && historyKeyWord.indexOf(keyword) < 0) {
-        wordHistory.push(keyword);
+        wordHistory.unshift(keyword);
         window.localStorage.setItem('keyword', wordHistory.join('|'));
       }
     },
