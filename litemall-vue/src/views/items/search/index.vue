@@ -73,6 +73,7 @@ export default {
       this.keyword = word.trim();
       this.reset();
       this.searchGoods();
+      this.pushHistoryTolocal(this.keyword)
     },
     reset() {
       this.list = [];
@@ -88,6 +89,11 @@ export default {
       const historyKeyWord = this.getKeyWordHistory();
       if (!!keyword.trim() && historyKeyWord.indexOf(keyword) < 0) {
         wordHistory.unshift(keyword);
+        window.localStorage.setItem('keyword', wordHistory.join('|'));
+      }
+      else if(!!keyword.trim() && historyKeyWord.indexOf(keyword) > 0) {
+        wordHistory.splice(historyKeyWord.indexOf(keyword), 1)
+        wordHistory.unshift(keyword)
         window.localStorage.setItem('keyword', wordHistory.join('|'));
       }
     },
