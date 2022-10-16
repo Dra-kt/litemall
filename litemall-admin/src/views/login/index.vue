@@ -30,7 +30,7 @@
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
 
-      <div style="position:relative">
+      <!-- <div style="position:relative">
         <div class="tips">
           <span> 超级管理员用户名: admin123</span>
           <span> 超级管理员用户名：admin123</span>
@@ -43,12 +43,12 @@
           <span> 推广管理员用户名: promotion123</span>
           <span> 推广管理员用户名：promotion123</span>
         </div>
-      </div>
+      </div> -->
     </el-form>
 
-    <div class="copyright">
+    <!-- <div class="copyright">
       Copyright © 2022 xxx.com 版权所有 <a href="https://github.com/linlinjava/litemall">沪ICP备xxx号</a>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -67,8 +67,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin123',
-        password: 'admin123',
+        username: '',
+        password: '',
         code: ''
       },
       codeImg: '',
