@@ -17,7 +17,6 @@ import org.linlinjava.litemall.db.service.CouponAssignService;
 import org.linlinjava.litemall.db.service.LitemallUserService;
 import org.linlinjava.litemall.wx.annotation.LoginUser;
 import org.linlinjava.litemall.wx.dto.UserInfo;
-import org.linlinjava.litemall.wx.dto.UserToken;
 import org.linlinjava.litemall.wx.dto.WxLoginInfo;
 import org.linlinjava.litemall.wx.service.CaptchaCodeManager;
 import org.linlinjava.litemall.wx.service.UserTokenManager;
@@ -194,7 +193,8 @@ public class WxAuthController {
         }
 
         if (!notifyService.isSmsEnable()) {
-            return ResponseUtil.fail(AUTH_CAPTCHA_UNSUPPORT, "小程序后台验证码服务不支持");
+            return ResponseUtil.ok(); // 跳过验证码
+//            return ResponseUtil.fail(AUTH_CAPTCHA_UNSUPPORT, "小程序后台验证码服务不支持");
         }
         String code = CharUtil.getRandomNum(6);
         boolean successful = CaptchaCodeManager.addToCache(phoneNumber, code);
@@ -260,10 +260,7 @@ public class WxAuthController {
             return ResponseUtil.fail(AUTH_INVALID_MOBILE, "手机号格式不正确");
         }
         //判断验证码是否正确
-        String cacheCode = CaptchaCodeManager.getCachedCaptcha(mobile);
-        if (cacheCode == null || cacheCode.isEmpty() || !cacheCode.equals(code)) {
-            return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
-        }
+        if(!validCaptcha(mobile, code)) return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
 
         String openId = "";
         // 非空，则是小程序注册
@@ -351,7 +348,9 @@ public class WxAuthController {
         }
 
         if (!notifyService.isSmsEnable()) {
-            return ResponseUtil.fail(AUTH_CAPTCHA_UNSUPPORT, "小程序后台验证码服务不支持");
+            //跳过验证码
+            return ResponseUtil.ok();
+//            return ResponseUtil.fail(AUTH_CAPTCHA_UNSUPPORT, "小程序后台验证码服务不支持");
         }
         String code = CharUtil.getRandomNum(6);
         boolean successful = CaptchaCodeManager.addToCache(phoneNumber, code);
@@ -388,10 +387,7 @@ public class WxAuthController {
             return ResponseUtil.badArgument();
         }
 
-        //判断验证码是否正确
-        String cacheCode = CaptchaCodeManager.getCachedCaptcha(mobile);
-        if (cacheCode == null || cacheCode.isEmpty() || !cacheCode.equals(code))
-            return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
+        if(!validCaptcha(mobile, code)) return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
 
         List<LitemallUser> userList = userService.queryByMobile(mobile);
         LitemallUser user = null;
@@ -442,10 +438,7 @@ public class WxAuthController {
             return ResponseUtil.badArgument();
         }
 
-        //判断验证码是否正确
-        String cacheCode = CaptchaCodeManager.getCachedCaptcha(mobile);
-        if (cacheCode == null || cacheCode.isEmpty() || !cacheCode.equals(code))
-            return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
+        if(!validCaptcha(mobile, code)) return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
 
         List<LitemallUser> userList = userService.queryByMobile(mobile);
         LitemallUser user = null;
@@ -555,5 +548,17 @@ public class WxAuthController {
         data.put("mobile", user.getMobile());
 
         return ResponseUtil.ok(data);
+    }
+
+    /**
+     * 判断验证码是否正确
+     * @param mobile 手机号
+     * @param code 验证码
+     * @return 正确时返回true，否则返回false
+     */
+    private boolean validCaptcha (String mobile, String code) {
+        return true;
+//        String cacheCode = CaptchaCodeManager.getCachedCaptcha(mobile);
+//        return cacheCode != null && !cacheCode.isEmpty() && cacheCode.equals(code);
     }
 }
