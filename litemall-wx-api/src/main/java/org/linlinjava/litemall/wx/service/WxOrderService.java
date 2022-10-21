@@ -1098,7 +1098,7 @@ public class WxOrderService {
         }
 
         // 设置支付订单金额
-        order.setActualPrice(order.getGoodsPrice());
+        order.setActualPrice(order.getActualPrice());
         order.setPayId("d"+ order.getGoodsPrice().intValue()+userId+System.currentTimeMillis());
         order.setPayTime(LocalDateTime.now());
         order.setOrderStatus(OrderUtil.STATUS_PAY);
