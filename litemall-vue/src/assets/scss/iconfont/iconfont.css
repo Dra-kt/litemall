@@ -10,7 +10,7 @@
 
 .van-icon {
 	position: relative;
-	font-family: "iconfont", "vanIcon" !important;
+	font-family: "iconfont", "vant-icon" !important;
 	font-size: 14px;
 	font-style: normal;
 	-webkit-font-smoothing: antialiased;
