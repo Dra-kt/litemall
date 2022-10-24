@@ -85,6 +85,10 @@ public class WxAuthController {
             return ResponseUtil.fail(AUTH_INVALID_ACCOUNT, "账号密码不对");
         }
 
+        if(user.getStatus()==1) {
+            return ResponseUtil.fail(AUTH_INVALID_ACCOUNT, "用户已被禁用");
+        }
+
         // 更新登录情况
         user.setLastLoginTime(LocalDateTime.now());
         user.setLastLoginIp(IpUtil.getIpAddr(request));
